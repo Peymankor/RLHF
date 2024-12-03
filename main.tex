@@ -1,0 +1,64 @@
+
+\documentclass[11pt]{article}
+%\documentclass[draft]{article}
+
+\usepackage{graphicx}
+\usepackage{authblk}  % for author affiliation formatting
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{natbib}
+\usepackage{setspace}  % for controlling line spacing
+\geometry{margin=1in}
+
+% Use biblatex for bibliography management
+%\usepackage[backend=biber,style=unsrt]{biblatex}
+
+% Add your bibliography file
+%\addbibresource{PaperIII_RLHF.bib}
+
+\title{Aligning AI Behavior with Human Values: A Tutorial on Reinforcement Learning from Human Feedback}
+\author{
+    Peyman Kor\textsuperscript{1} \\ \texttt{kor.peyman@gmail.com}
+    %Second Author\textsuperscript{2} \\ \texttt{second.author@example.com}
+}
+\affil[1]{Energy Resources Department, University of Stavanger, Norway}
+\date{}  % arXiv papers typically omit the date
+
+\begin{document}
+
+\maketitle
+\onehalfspacing  % or \doublespacing
+\begin{abstract}
+
+The rapid development and widespread adoption of Large Language Models (LLMs) have highlighted the 
+need to align these models with human preferences and (values). Reinforcement Learning from 
+Human Feedback (RLHF) has emerged as a promising approach for this purpose, by enabling 
+LLMs to generate output text that better aligns with human preferences, thereby enhancing their practical use for human.
+
+This report explores the core components of RLHF, including feedback collection, reward modeling, model fine-tuning, and evaluation.
+We further discuss key challenges, such as implicit bias in LLMs and ethical considerations 
+and outline open research questions and future directions for advancing RLHF and aligning AI systems 
+with diverse human values.
+\end{abstract}
+
+\tableofcontents
+\newpage
+% Include chapters
+\input{chapters/intro-rlhf}
+
+
+\input{chapters/gather-feedback.tex}
+
+\input{chapters/model-reward.tex}
+
+\input{chapters/tunning-lllm.tex}
+
+\input{chapters/model-evaluation.tex}
+
+\input{chapters/challenges.tex}
+\bibliographystyle{unsrt}  % Common for arXiv
+%\bibliography{./PaperIII_RLHF}
+%\bibliography{PaperIII_RLHF}
+\bibliography{PaperIII_RLHF}
+\end{document}

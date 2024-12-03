@@ -1,0 +1,126 @@
+\section{Fine-Tuning Language Models Using Reward Models}
+\label{sec:tunning-lllm.tex}
+
+Now that we have defined reward model concept in previous chapter, we can now explore how the  reward models can be used to tune pre-trained large language models (LLMs). In this context, Reinforcement Learning (RL) approach is employed to tune the LLMs. Essentially, the weights of the pre-trained LLM is a policy, and the objective is to tune (update the weights of pre-trained LLM) to maximize the expected reward.
+
+Two major methods are used to tune LLMs with  the reward models: 
+Proximal Policy Optimization (PPO) \cite{schulmanProximalPolicyOptimization2017} and Direct 
+Policy Optimization (DPO). This section discusses these approaches, starting with PPO and then covering DPO.
+
+
+\subsection{Tuning Models} \label{subsec:tunning-models}
+
+
+\subsubsection{Proximal Policy Optimization (PPO)} \label{subsubsec:ppo}
+
+Proximal Policy Optimization (PPO) is a popular reinforcement learning 
+algorithm that is used to train large language models (LLMs) with human feedback. 
+However, \cite{lambertReinforcementLearningHumana} critiques its reliance on assumptions about human preferences, calling for alternative optimization techniques.
+
+PPO is an on-policy algorithm that uses a policy gradient method to update the parameters of the LLM. The training objective is to minimize the PPO loss function $\mathcal{L}_{PPO}$. The loss function is defined as the negative of the expected reward, over all training samples we have. The PPO loss function $\mathcal{L}_{PPO}$ has two components: the reward $r(x, \hat{y})$ and the KL divergence between the old policy $\pi^{SFT}$ and the new policy $\pi^{RL}_{\phi}$.
+
+The objective is to maximize the rewards $r(x, \hat{y})$ while preventing \textit{reward hacking}, which is the tendency for the model $\pi^{RL}_{\phi}$ to deviate too much from the original policy 
+$\pi^{SFT}$. \\ 
+
+
+\textbf{Mathematical Formulation:}
+
+
+The following elements are essential to define the loss function in PPO algorithm:
+
+\begin{itemize}
+    \item $x$: prompt 
+    \item $r_{\theta}(x,\hat{y})$: is the reward model, which assigns a scalar value to 
+    the $(x=\text{prompt}, \hat{y}=\text{response})$ pair.
+    \item $\pi^{SFT}$: The old policy after Supervised Fine-Tuning (SFT), which is the policy that we want to update.
+    \item $\pi^{RL}_{\phi}$: The new policy being trained with Reinforcement Learning (RL), parameterized 
+    by $\phi$.
+    \item $D_{RL}$: the dataset of $x$ prompts used explicitly for the RL model.
+\end{itemize}
+
+With these definitions,the training process proceeds as follows:
+
+
+\begin{enumerate}
+    \item Draw a sample $x_{RL}$ from the dataset $D_{RL}$.
+    \item Generate responses $y \sim \pi^{RL}_{\phi}(x_{RL})$ using the current policy.
+    \item Compute the reward $r_{\theta}(x_{RL}, y)$ for each generated response.
+\end{enumerate}
+
+To ensure that the new policy $\pi^{RL}_{\phi}$ does not deviate excessively from the old policy $\pi^{SFT}$ a penalty term based on the KL divergence is added. The resulting objective function is:
+The loss function is defined as follows:
+\begin{equation}
+    \mathcal{L}_{PPO} (\phi) = J(\phi)  = - \mathbb{E}_{x \sim D_{RL}} \left[ r_{\theta}(x, y) - \lambda \log(\frac{\pi^{RL}_{\phi}(y|x)}
+    {\pi^{SFT}(y|x)}) 
+    \right]
+    \label{eq:ppo_loss}
+\end{equation}
+
+Equation \ref{eq:ppo_loss} is the objective function that we want to maximize, 
+using the PPO algorithm. PPO is a type of policy gradient method \cite{mnihAsynchronousMethodsDeep2016}
+that directly optimize the policy to maximize the expected reward, instead of learning the value function as in 
+a Q-learning algorithm. The key idea behind the policy gradient method is to improve the 
+policy by taking a step in the direction opposite of the gradient of the expected reward with respect to the policy parameters. In this work, the policy is parametrized as $\pi^{RL}_{\phi}$, which can be defined as  $\pi(a|s, \phi)$, which the probability of taking action $a$ in state $s$. Then, the update rule for the policy parameters $\phi$ is given by:
+
+\begin{equation}
+    \phi \leftarrow \phi - \alpha \nabla_{\phi} J(\phi)
+        \label{eq:ppo_update}
+\end{equation}
+
+where $\alpha$ is the learning rate. This update rule ensures that the policy parameters are adjusted to minimize the objective function while maintaining alignment with the original policy. For the detail of the how PPO method is used for training the 
+LLMs, we refer the reader to the original paper \cite{zhengSecretsRLHFLarge2023}.
+
+\subsubsection{Direct Policy Optimization (DPO)} \label{subsubsec:dpo}
+
+As we saw in the previous section, while RLHF with PPO achieves satisfactory results in aligning LLM with human preferences, it has some limitations:
+
+\begin{itemize}
+    \item \textit{Too many steps}: RLHF involves a multi-step process. First, a reward model is trained, and then the LLM is fine-tuned with this reward model. This two-step process can be time-consuming.
+     
+    \item \textit{Many hyperparameters to tune}: PPO need tuning of several hyperparameters, including the learning rate, $\lambda$ and few inside the PPO algorithm.
+    
+\end{itemize}
+
+To address these limitations, Direct Policy Optimization (DPO) \cite{rafailovDirectPreferenceOptimization2024a} was proposed that combine the reward model and PPO 
+stages into a single supervised step. This approach directly use human-labeled preference data to optimize the policy. \\
+
+
+\textbf{Mathematical Formulation:} \\
+
+
+The following elements are needed to be explained for DPO algorithm, similar to RLHF:
+\begin{itemize}
+    \item $x$: The prompt 
+    \item $\pi^{SFT}$: The old policy after Supervised Fine-Tuning (SFT), which is the policy that we want to update.
+    \item $\pi^{new}_{\phi}$: The new policy being trained with Reinforcement Learning (RL), parameterized by $\phi$.
+    \item $D_{new}$: The dataset of prompts used for training
+
+\end{itemize}
+
+
+The training process is as follows:
+\begin{enumerate}
+    \item Draw a sample $x_{RL}$ from the dataset $D_{RL}$.
+    \item Generating two responses $\hat{y}_{1}$ and $\hat{y}_{2}$ using the current policy
+    \item Labeling the responses as the winning response $\hat{y}_{w}$ and the losing response $\hat{y}_{l}$.
+\end{enumerate}
+
+We can now define the loss function as follows:
+
+\begin{equation}
+    \mathcal{L}_{\text{DPO}}(\pi_\phi; \pi_{\text{ref}}) = 
+- \mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}} 
+\left[
+\log \sigma \left(
+\beta \log \frac{\pi_\phi^{new}(y_w \mid x)}{\pi^{\text{SFT}}(y_w \mid x)}
+- \beta \log \frac{\pi_\phi^{new}(y_l \mid x)}{\pi^{\text{SFT}}(y_l \mid x)}
+\right)
+\right] \label{eq:dpo_loss}
+\end{equation}
+
+Intuitively, the loss function in Equation \ref{eq:dpo_loss} is the negative log-likelihood of the winning response
+$\hat{y}_{w}$ and the losing response $\hat{y}_{l}$, weighted by the difference in the log-likelihood of the new policy
+$\pi_{\phi}^{new}$ and the old policy $\pi^{\text{SFT}}$. The goal is to maximize the likelihood of the winning response
+and minimize the likelihood of the losing response, while preventing the new policy from deviating too much from the old policy.
+
+Another method, KTO \cite{ethayarajhKTOModelAlignment2024}, introduces the Kahneman-Tversky-Olson (KTO) loss function to optimize the policy. While the details of KTO are beyond the scope of this report, we refer readers to \cite{ethayarajhKTOModelAlignment2024} for further information.
