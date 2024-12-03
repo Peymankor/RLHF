@@ -1,0 +1,14 @@
+# LaTeX auxiliary files
+*.aux
+*.log
+*.toc
+*.out
+*.blg
+*.bbl
+*.fls
+*.fdb_latexmk
+*.gz
+*.xdv
+
+# Backup files
+*~
