@@ -3,7 +3,13 @@
 Tutorial on Reinforcement Learning from Human Feedback (RLHF): Aligning AI behavior with human values through feedback-driven training
 
 
-To read my pdf report, click [here](main.pdf)   
+To read my pdf report, click [Here](main.pdf).   
+
+
+
+## Roadmap for Reinforcement Learning from Human Feedback (RLHF):
+
+![Alt Text](images/rlhf.png)
 
 Here's a 9-Hour Crash Course on RLHF (Reinforcement Learning from Human Feedback).
 
