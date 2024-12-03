@@ -3,6 +3,8 @@
 Tutorial on Reinforcement Learning from Human Feedback (RLHF): Aligning AI behavior with human values through feedback-driven training
 
 
+To read my pdf report, click [here](main.pdf)   
+
 Here's a 9-Hour Crash Course on RLHF (Reinforcement Learning from Human Feedback).
 
 A comprehensive guide for post-alignment of Large Language Models (LLMs). 
